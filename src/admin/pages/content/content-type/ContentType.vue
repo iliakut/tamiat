@@ -35,16 +35,16 @@
                 </div>
                 <!-- fields area -->
                 <div class="field">
-                  <div class="field" v-for="fieldsName in Object.keys(contentFields)" :key="fieldsName">
+                  <div class="field" v-for="fieldsType in Object.keys(contentFields)" :key="fieldsType">
                     <span class="label">
-                      {{ fieldsName }}
+                      {{ fieldsType }}
                     </span>
                     <ul class="nav-preview">
-                      <li v-for="field in contentFields[fieldsName]" :key="field">
+                      <li v-for="(field, index) in contentFields[fieldsType]" :key="field">
                         {{ field }}
                         <span>
                           <span class="link-actions">
-                            <span class="has-text-danger fa fa-trash" @click=""></span>
+                            <span class="has-text-danger fa fa-trash" @click="deleteContentField(fieldsType, index)"></span>
                             <span class="has-text-info fa fa-edit"></span>
                         </span>
                       </span>
@@ -250,7 +250,10 @@ export default {
       this.showModal = false
     },
     deleteContentField (fieldType, index) {
-      this.contentFields[fieldType].splice(index, 1)
+      let currentContentFields = this.contentFields
+      currentContentFields[fieldType].splice(index, 1)
+      // this made to help Vue see changes inside of Object
+      this.contentFields = Object.assign({}, currentContentFields)
     },
     loadContentTypes () {
       this.contentsLoaded = false
