@@ -33,6 +33,25 @@
                     <option v-for="field in fieldTypes" :key="field.id">{{ field.label }}</option>
                   </modal>
                 </div>
+                <!-- fields area -->
+                <div class="field">
+                  <div class="field" v-for="fieldsName in Object.keys(contentFields)" :key="fieldsName">
+                    <span class="label">
+                      {{ fieldsName }}
+                    </span>
+                    <ul class="nav-preview">
+                      <li v-for="field in contentFields[fieldsName]" :key="field">
+                        {{ field }}
+                        <span>
+                          <span class="link-actions">
+                            <span class="has-text-danger fa fa-trash" @click=""></span>
+                            <span class="has-text-info fa fa-edit"></span>
+                        </span>
+                      </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
 
                 <!-- Custom Fields -->
                 <label class="label">Fields</label>
@@ -223,9 +242,11 @@ export default {
       const fieldName = contentFieldArrParams[0]
       const fieldType = contentFieldArrParams[1]
       if (fieldName === '' || fieldType === '') return
-      // create arr for Field
-      this.contentFields[fieldType] = []
-      this.contentFields[fieldType].push({ name: fieldName })
+      // create arr for Field if it was not created
+      if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
+      // add new field to field Type array
+      this.contentFields[fieldType].push(fieldName)
+      // close modal
       this.showModal = false
     },
     deleteContentField (fieldType, index) {
