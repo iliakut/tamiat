@@ -26,7 +26,7 @@
                 </div>
                 <!-- area to add new field (variables) to the Content -->
                 <div class="field">
-                  <button type="submit" class="button is-info"  @click="callModal">Add new field</button>
+                  <button type="submit" class="button is-info"  @click="showModal = true">Add new field</button>
                   <!-- Modal -->
                   <modal class="modal" @close="showModal = false"  @addContentField='addNewContentField($event)' v-if="showModal" :kind="'addContentField'" :header="'Add content field'">
                     <!-- Modal Slot - made for adding content type fields -->
@@ -35,22 +35,36 @@
                 </div>
                 <!-- fields area -->
                 <div class="field">
-                  <div class="field" v-for="fieldsType in Object.keys(contentFields)" :key="fieldsType">
+                  <div class="field" v-for="(fieldsType, typeIndex) in Object.keys(contentFields)" :key="fieldsType">
                     <span class="label">
                       {{ fieldsType }}
                     </span>
                     <ul class="nav-preview">
-                      <li v-for="(field, index) in contentFields[fieldsType]" :key="field">
-                        {{ field }}
+                      <li v-for="(field, fieldIndex) in contentFields[fieldsType]" :key="field">
                         <span>
+                          {{ field }}
                           <span class="link-actions">
-                            <span class="has-text-danger fa fa-trash" @click="deleteContentField(fieldsType, index)"></span>
-                            <span class="has-text-info fa fa-edit"></span>
+                            <span class="has-text-danger fa fa-trash" @click="deleteContentField(fieldsType, fieldIndex)"></span>
+                            <span class="has-text-info fa fa-edit" @click="callEditModal(fieldsType, field)"></span>
+                          </span>
                         </span>
-                      </span>
                       </li>
                     </ul>
+                    <!-- editing -->
+                    <!-- Modal -->
+                    <modal class="modal"
+                           @close="showEditModal = false"
+                           @addContentField='editContentField($event)'
+                           v-if="showEditModal"
+                           :kind="'addContentField'"
+                           :header="'Edit content field'"
+                           :contentFieldName="editingField.name"
+                           :contentFieldType="editingField.type">
+                      <!-- Modal Slot - made for adding content type fields -->
+                      <option v-for="field in fieldTypes" :key="field.id">{{ field.label }}</option>
+                    </modal>
                   </div>
+                  <!-- Modal -->
                 </div>
 
                 <!-- Custom Fields -->
@@ -219,7 +233,12 @@ export default {
       selectedContent: null,
       contentsLoaded: false,
       selectedContntFields: null,
-      showModal: false
+      showModal: false,
+      showEditModal: false,
+      editingField: {
+        type: '',
+        name: ''
+      }
     }
   },
   created () {
@@ -234,9 +253,6 @@ export default {
     }
   },
   methods: {
-    callModal () {
-      this.showModal = true
-    },
     addNewContentField (contentFieldArrParams) {
       // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
       const fieldName = contentFieldArrParams[0]
@@ -249,11 +265,19 @@ export default {
       // close modal
       this.showModal = false
     },
+    editContentField () {
+
+    },
     deleteContentField (fieldType, index) {
       let currentContentFields = this.contentFields
       currentContentFields[fieldType].splice(index, 1)
       // this made to help Vue see changes inside of Object
       this.contentFields = Object.assign({}, currentContentFields)
+    },
+    callEditModal (fieldType, name) {
+      this.showEditModal = true
+      this.editingField.name = name
+      this.editingField.type = fieldType
     },
     loadContentTypes () {
       this.contentsLoaded = false
