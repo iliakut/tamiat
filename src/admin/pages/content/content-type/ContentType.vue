@@ -237,7 +237,8 @@ export default {
       showEditModal: false,
       editingField: {
         type: '',
-        name: ''
+        name: '',
+        index: null
       }
     }
   },
@@ -265,19 +266,33 @@ export default {
       // close modal
       this.showModal = false
     },
-    editContentField () {
-
+    editContentField (contentFieldArrParams) {
+      // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
+      const fieldName = contentFieldArrParams[0]
+      const fieldType = contentFieldArrParams[1]
+      if (fieldName === '' || fieldType === '') return
+      // create arr for Field if it was not created
+      if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
+      // delete previous Field
+      this.deleteContentField(this.editingField.type, this.editingField.index)
+      // add new field to field Type array
+      this.contentFields[fieldType].push(fieldName)
+      // close modal
+      this.showEditModal = false
     },
     deleteContentField (fieldType, index) {
       let currentContentFields = this.contentFields
       currentContentFields[fieldType].splice(index, 1)
+      // if Field array is empty - delete it
+      if (currentContentFields[fieldType].length === 0) delete currentContentFields[fieldType]
       // this made to help Vue see changes inside of Object
       this.contentFields = Object.assign({}, currentContentFields)
     },
     callEditModal (fieldType, name) {
-      this.showEditModal = true
       this.editingField.name = name
       this.editingField.type = fieldType
+      this.editingField.index = this.contentFields[fieldType].indexOf(name)
+      this.showEditModal = true
     },
     loadContentTypes () {
       this.contentsLoaded = false
