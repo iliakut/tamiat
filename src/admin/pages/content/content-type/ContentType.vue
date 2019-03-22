@@ -35,12 +35,12 @@
                 </div>
                 <!-- fields area -->
                 <div class="field">
-                  <div class="field" v-for="(fieldsType, typeIndex) in Object.keys(contentFields)" :key="fieldsType">
+                  <div class="field" v-for="(fieldsType, typeIndex) in Object.keys(contentFields)" :key="fieldsType + typeIndex">
                     <span class="label">
                       {{ fieldsType }}
                     </span>
                     <ul class="nav-preview">
-                      <li v-for="(field, fieldIndex) in contentFields[fieldsType]" :key="field">
+                      <li v-for="(field, fieldIndex) in contentFields[fieldsType]" :key="field + fieldIndex">
                         <span>
                           {{ field }}
                           <span class="link-actions">
@@ -50,21 +50,20 @@
                         </span>
                       </li>
                     </ul>
-                    <!-- editing -->
-                    <!-- Modal -->
-                    <modal class="modal"
-                           @close="showEditModal = false"
-                           @addContentField='editContentField($event)'
-                           v-if="showEditModal"
-                           :kind="'addContentField'"
-                           :header="'Edit content field'"
-                           :contentFieldName="editingField.name"
-                           :contentFieldType="editingField.type">
-                      <!-- Modal Slot - made for adding content type fields -->
-                      <option v-for="field in fieldTypes" :key="field.id">{{ field.label }}</option>
-                    </modal>
                   </div>
+                  <!-- editing -->
                   <!-- Modal -->
+                  <modal class="modal"
+                         @close="showEditModal = false"
+                         @addContentField='editContentField($event)'
+                         v-if="showEditModal"
+                         :kind="'addContentField'"
+                         :header="'Edit content field'"
+                         :contentFieldName="editingField.name"
+                         :contentFieldType="editingField.type">
+                    <!-- Modal Slot - made for adding content type fields -->
+                    <option v-for="field in fieldTypes" :key="field.id">{{ field.label }}</option>
+                  </modal>
                 </div>
 
                 <!-- Custom Fields -->
@@ -258,7 +257,7 @@ export default {
       // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
       const fieldName = contentFieldArrParams[0]
       const fieldType = contentFieldArrParams[1]
-      if (fieldName === '' || fieldType === '') return
+      if (fieldName === '' || fieldType === '' || fieldName === undefined || fieldType === undefined) return
       // create arr for Field if it was not created
       if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
       // add new field to field Type array
@@ -270,13 +269,13 @@ export default {
       // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
       const fieldName = contentFieldArrParams[0]
       const fieldType = contentFieldArrParams[1]
-      if (fieldName === '' || fieldType === '') return
+      if (fieldName === '' || fieldType === '' || fieldName === undefined || fieldType === undefined) return
       // create arr for Field if it was not created
       if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
-      // delete previous Field
-      this.deleteContentField(this.editingField.type, this.editingField.index)
       // add new field to field Type array
       this.contentFields[fieldType].push(fieldName)
+      // delete previous Field
+      this.deleteContentField(this.editingField.type, this.editingField.index)
       // close modal
       this.showEditModal = false
     },
