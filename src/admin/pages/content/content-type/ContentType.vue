@@ -320,13 +320,13 @@ export default {
       // this made to help Vue see changes inside of Object
       this.availableContentFields = Object.assign({}, currentContentFields)
     },
-    resetContentField () {
+    resetContentFields () {
       this.editingField = {
         type: '',
         name: '',
         index: null
       }
-      this.availableContentFields = {}
+      this.contentFields = []
     },
     callEditModal (fieldType, name) {
       this.editingField.name = name
@@ -368,7 +368,8 @@ export default {
 
       let item = {
         name: this.name,
-        contentFields: this.availableContentFields,
+        // load contentFields to item to send it to Firebase
+        contentFields: this.contentFields,
         slug: this.slug,
         path: `/admin/content/${path}`,
         icon: 'fa-file-text',
@@ -402,6 +403,7 @@ export default {
     },
     resetForm () {
       this.name = ''
+      this.resetContentFields()
       this.slug = ''
       this.selectedContent = null
       for (var fieldKey in this.fields) {
@@ -462,6 +464,8 @@ export default {
         }
       })[0]
       this.slug = this.selectedContent.slug
+      // load selected fields from selectedField to current content Field
+      if (this.selectedContent.contentFields !== undefined) this.contentFields = this.selectedContent.contentFields
       this.clearChecked()
       if (option.id) {
         this.mapFields()
