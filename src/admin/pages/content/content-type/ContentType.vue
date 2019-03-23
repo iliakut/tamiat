@@ -26,7 +26,7 @@
                 </div>
                 <!-- area to add new field (variables) to the Content -->
                 <div class="field">
-                  <button type="submit" class="button is-info"  @click="showModal = true">Add new field</button>
+                  <button type="submit" class="button is-info is-small"  @click="showModal = true">Add new field</button>
                   <!-- Modal -->
                   <modal class="modal" @close="showModal = false"  @addContentField='addNewContentField($event)' v-if="showModal" :kind="'addContentField'" :header="'Add content field'">
                     <!-- Modal Slot - made for adding content type fields -->
@@ -34,18 +34,21 @@
                   </modal>
                 </div>
                 <!-- fields area -->
+                <span class="label">Available content fields</span>
+                <span class="label has-text-danger is-size-7" v-if="Object.keys(availableContentFields).length">Select the content fields you want to include in your content type</span>
                 <div class="field">
-                  <div class="field" v-for="(fieldsType, typeIndex) in Object.keys(contentFields)" :key="fieldsType + typeIndex">
-                    <span class="label">
+                  <div class="field" v-for="(fieldsType, typeIndex) in Object.keys(availableContentFields)" :key="fieldsType + typeIndex">
+                    <span>
                       {{ fieldsType }}
                     </span>
                     <ul class="nav-preview">
-                      <li v-for="(field, fieldIndex) in contentFields[fieldsType]" :key="field + fieldIndex">
+                      <li v-for="(field, fieldIndex) in availableContentFields[fieldsType]" :key="field + fieldIndex">
                         <span>
                           {{ field }}
                           <span class="link-actions">
-                            <span class="has-text-danger fa fa-trash" @click="deleteContentField(fieldsType, fieldIndex)"></span>
+                            <span class="has-text-danger fa fa-trash" @click="deleteAvailableContentField(fieldsType, fieldIndex)"></span>
                             <span class="has-text-info fa fa-edit" @click="callEditModal(fieldsType, field)"></span>
+                            <span class="has-text-success fa fa-plus-square" @click="addContentFieldToContent(fieldsType, field)"></span>
                           </span>
                         </span>
                       </li>
@@ -64,6 +67,21 @@
                     <!-- Modal Slot - made for adding content type fields -->
                     <option v-for="field in fieldTypes" :key="field.id">{{ field.label }}</option>
                   </modal>
+                </div>
+
+                <!-- Content fields of current Content -->
+                <span class="label">Content fields</span>
+                <div class="field">
+                  <ul class="nav-preview">
+                      <li v-for="(contentField, index) in contentFields" :key="contentField + index">
+                        <span>
+                          {{ contentField.name }}
+                          <span class="link-actions">
+                            <span class="has-text-danger fa fa-trash" @click="deleteContentFieldFromContent(index)"></span>
+                          </span>
+                        </span>
+                      </li>
+                    </ul>
                 </div>
 
                 <!-- Custom Fields -->
@@ -159,7 +177,7 @@
 <script>
 import checkbox from '@/admin/components/shared/Checkbox'
 import dropdown from '@/admin/components/shared/Dropdown'
-import { contentsRef, fieldsRef } from '@/admin/firebase_config'
+import { contentsRef, fieldsRef, contentFieldsRef } from '@/admin/firebase_config'
 import notifier from '@/admin/mixins/notifier'
 import modal from '@/admin/components/shared/Modal'
 
@@ -174,10 +192,12 @@ export default {
         this.loadContentTypes()
       }
     },
-    fields: fieldsRef
+    fields: fieldsRef,
+    contentFieldsTemplate: contentFieldsRef
   },
   data () {
     return {
+      test: false,
       name: '',
       fieldTypes: [
         {
@@ -217,10 +237,11 @@ export default {
           label: 'Image'
         }
       ],
-      contentFields: {
-        /* this obj will contain all new fields for Content
+      availableContentFields: {
+      /* this obj will contain all new fields for Content
         * every array contains its area objects (with names and etc.) */
       },
+      contentFields: [],
       slug: '',
       showDesc: false,
       createdContentTypes: null,
@@ -253,17 +274,29 @@ export default {
     }
   },
   methods: {
+    testFirebase (item) {
+      this.$firebaseRefs.contentFields.push(item)
+      this.$firebaseRefs.contents.child(this.selectedContent['.key']).set(item)
+    },
     addNewContentField (contentFieldArrParams) {
       // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
       const fieldName = contentFieldArrParams[0]
       const fieldType = contentFieldArrParams[1]
       if (fieldName === '' || fieldType === '' || fieldName === undefined || fieldType === undefined) return
       // create arr for Field if it was not created
-      if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
+      if (!this.availableContentFields[fieldType]) this.availableContentFields[fieldType] = []
       // add new field to field Type array
-      this.contentFields[fieldType].push(fieldName)
+      this.availableContentFields[fieldType].push(fieldName)
       // close modal
       this.showModal = false
+    },
+    addContentFieldToContent (type, name) {
+      console.log(this.contentFields)
+      this.contentFields.push({type: type, name: name})
+      console.log(this.contentFields)
+    },
+    deleteContentFieldFromContent (index) {
+      this.contentFields.splice(index, 1)
     },
     editContentField (contentFieldArrParams) {
       // contentFieldArrParams is arr that contains two elements 0 - name of Field 1 - type of Field
@@ -271,26 +304,34 @@ export default {
       const fieldType = contentFieldArrParams[1]
       if (fieldName === '' || fieldType === '' || fieldName === undefined || fieldType === undefined) return
       // create arr for Field if it was not created
-      if (!this.contentFields[fieldType]) this.contentFields[fieldType] = []
+      if (!this.availableContentFields[fieldType]) this.availableContentFields[fieldType] = []
       // add new field to field Type array
-      this.contentFields[fieldType].push(fieldName)
+      this.availableContentFields[fieldType].push(fieldName)
       // delete previous Field
-      this.deleteContentField(this.editingField.type, this.editingField.index)
+      this.deleteAvailableContentField(this.editingField.type, this.editingField.index)
       // close modal
       this.showEditModal = false
     },
-    deleteContentField (fieldType, index) {
-      let currentContentFields = this.contentFields
+    deleteAvailableContentField (fieldType, index) {
+      let currentContentFields = this.availableContentFields
       currentContentFields[fieldType].splice(index, 1)
       // if Field array is empty - delete it
       if (currentContentFields[fieldType].length === 0) delete currentContentFields[fieldType]
       // this made to help Vue see changes inside of Object
-      this.contentFields = Object.assign({}, currentContentFields)
+      this.availableContentFields = Object.assign({}, currentContentFields)
+    },
+    resetContentField () {
+      this.editingField = {
+        type: '',
+        name: '',
+        index: null
+      }
+      this.availableContentFields = {}
     },
     callEditModal (fieldType, name) {
       this.editingField.name = name
       this.editingField.type = fieldType
-      this.editingField.index = this.contentFields[fieldType].indexOf(name)
+      this.editingField.index = this.availableContentFields[fieldType].indexOf(name)
       this.showEditModal = true
     },
     loadContentTypes () {
@@ -327,7 +368,7 @@ export default {
 
       let item = {
         name: this.name,
-        contentFields: this.contentFields,
+        contentFields: this.availableContentFields,
         slug: this.slug,
         path: `/admin/content/${path}`,
         icon: 'fa-file-text',
@@ -361,9 +402,6 @@ export default {
     },
     resetForm () {
       this.name = ''
-      this.contentFields = {
-        textArea: []
-      }
       this.slug = ''
       this.selectedContent = null
       for (var fieldKey in this.fields) {
