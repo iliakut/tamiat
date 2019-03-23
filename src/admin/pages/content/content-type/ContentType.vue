@@ -292,7 +292,7 @@ export default {
     },
     addContentFieldToContent (type, name) {
       console.log(this.contentFields)
-      this.contentFields.push({type: type, name: name})
+      this.contentFields.push({ type: type, name: name })
       console.log(this.contentFields)
     },
     deleteContentFieldFromContent (index) {
