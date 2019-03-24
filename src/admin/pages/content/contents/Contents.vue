@@ -1,6 +1,12 @@
 <template>
   <div class="container posts" id="posts" v-if="loaded">
 
+    <!-- Field to edit contentField (non cyclic data) -->
+    <div class="content-heading is-flex">
+      <h3 class="is-size-3">Fields of {{ content.name }}</h3>
+      <router-link :to="'/admin/content/' + $route.params.key + '/new'" class="button is-info">Add New ContentField</router-link>
+    </div>
+
     <!-- Page title -->
     <div class="content-heading is-flex">
       <h3 class="is-size-3">{{ content.name }}</h3>
