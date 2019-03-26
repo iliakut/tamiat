@@ -4,7 +4,7 @@
     <!-- Field to edit contentField (non cyclic data) -->
     <div class="content-heading is-flex">
       <h3 class="is-size-3">Fields of {{ content.name }}</h3>
-      <router-link :to="'/admin/content/' + $route.params.key + '/new'" class="button is-info">Add New ContentField</router-link>
+      <router-link :to="'/admin/content/' + $route.params.key + '/newContentField'" class="button is-info">Add New ContentField</router-link>
     </div>
 
     <!-- Page title -->
@@ -24,9 +24,12 @@
     <transition mode="out-in" name="fade">
       <modal @close="showModal = false" :kind="kind" @confirmDeleteContent='confirmDeleteContent()' @selectBulkActions='selectBulkActions()' v-if="showModal" :header="header" />
     </transition>
+<!--
+    &lt;!&ndash; New content form loaded via router &ndash;&gt;
+    <router-view :add-content="addContent" :fields="content.fields" :update-content="updateContent" :contents="contentData" :key="$route.name + ($route.params.key || '')"></router-view>-->
 
-    <!-- New content form loaded via router -->
-    <router-view :add-content="addContent" :fields="content.fields" :update-content="updateContent" :contents="contentData" :key="$route.name + ($route.params.key || '')"></router-view>
+    <!-- New contentField form loaded via router -->
+    <router-view :add-content="addContentField" :fields="content.contentFields" :update-content="updateContent" :contents="contentFieldsData" :key="$route.name + ($route.params.key || '')"></router-view>
 
     <!-- Search contents -->
     <div class="field is-grouped">
@@ -136,7 +139,7 @@ export default {
       }))[0]
     )
     this.$bindAsArray('contentData', db.ref('contents/' + this.$route.params.key + '/data'))
-
+    this.$bindAsArray('contentFieldsData', db.ref('contents/' + this.$route.params.key + '/data'))
     this.loaded = true
   },
   computed: {
@@ -179,11 +182,17 @@ export default {
       if (this.content.slug) {
         content.slug = this.slugify(content[this.content.slug])
       }
-
       this.$firebaseRefs.contents.child(this.$route.params.key + '/data')
         .push(content)
         .then(() => {
           this.showNotification('success', 'Content added successfully')
+        })
+    },
+    addContentField (content) {
+      this.$firebaseRefs.contents.child(this.$route.params.key + '/contentFieldsData')
+        .push(content)
+        .then(() => {
+          this.showNotification('success', 'ContentField added successfully')
         })
     },
     deleteContent (content) {

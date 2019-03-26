@@ -72,6 +72,10 @@ const routes = [
           {
             path: 'edit/:contentKey',
             component: ContentsEdit
+          },
+          {
+            path: 'newContentField',
+            component: ContentsNew
           }
         ]
       }
