@@ -291,9 +291,7 @@ export default {
       this.showModal = false
     },
     addContentFieldToContent (type, name) {
-      console.log(this.contentFields)
       this.contentFields.push({ type: type, name: name })
-      console.log(this.contentFields)
     },
     deleteContentFieldFromContent (index) {
       this.contentFields.splice(index, 1)
@@ -378,6 +376,7 @@ export default {
       if (edit) {
         this.selectedContent.path = `/admin/content/${path}`
         this.selectedContent.fields = selectedFields
+        this.selectedContent.contentFields = this.contentFields
         this.selectedContent.slug = this.slug
         let item = { ...this.selectedContent }
         delete item['.key']
@@ -466,6 +465,7 @@ export default {
       this.slug = this.selectedContent.slug
       // load selected fields from selectedField to current content Field
       if (this.selectedContent.contentFields !== undefined) this.contentFields = this.selectedContent.contentFields
+      else (this.contentFields = [])
       this.clearChecked()
       if (option.id) {
         this.mapFields()
