@@ -60,7 +60,7 @@ export default {
       if (this.kind === 'addField') { this.$emit('addField', this.fieldName) }
       if (this.kind === 'addPage') { this.$emit('addPage', this.pageName) }
       if (this.kind === 'addSetting') { this.$emit('addSetting', this.settingName) }
-      if (this.kind === 'addContentField') { this.$emit('addContentField', [this.localContentFieldName, this.localContentFieldType]) }
+      if (this.kind === 'addContentField') { this.$emit('addContentField', [this.localContentFieldName, this.localContentFieldType.toLowerCase()]) }
     },
     deleteObj () {
       if (this.kind === 'deleteField') { this.$emit('confirmDeleteField') }
